@@ -11,6 +11,8 @@ import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.EmployeeLoginVO;
+import io.lettuce.core.output.ListOfGenericMapsOutput;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -85,5 +87,28 @@ public class EmployeeController {
         log.info("分页查询结果：{}",employeePageQueryDTO);
         PageResult pageResult = employeeService.pageQuery(employeePageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    @PostMapping("/status/{status}")
+    public Result startOrStop(@PathVariable Integer status,Long id){
+
+        log.info("启用员工或禁用员工：{}，{}",status,id);
+        employeeService.startOrStop(status,id);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}")
+    public  Result<Employee> getById(@PathVariable Long id){
+
+        Employee employee = employeeService.getById(id);
+        return Result.success(employee);
+    }
+
+    @PutMapping
+    public Result update(@RequestBody EmployeeDTO employeeDTO){
+
+        log.info("编辑员工信息：{}",employeeDTO);
+        employeeService.update(employeeDTO);
+        return Result.success();
     }
 }
