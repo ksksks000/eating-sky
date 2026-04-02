@@ -39,10 +39,9 @@ public interface DishMapper {
     //根据菜品id集合批量删除菜品
     void deleteById(List<Long> ids);
 
-    //根据菜品id查询对应的口味
-    @Select("select * from dish_flavor where dish_id = #{dishId}")
-    List<DishFlavor> getFlavorById(Long dishId);
 
     @AutoFill(value = OperationType.UPDATE)
     void update(Dish dish);
+
+    List<Dish> list(Dish dish);
 }

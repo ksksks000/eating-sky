@@ -49,4 +49,38 @@
         </set>
         where id = #{id}
     </update>
+
+
+    <!-- SQL 片段：避免重复编写列名 -->
+    <sql id="Base_Column_List">
+        id, name, category_id, price, image, description, status,
+        create_time, update_time, create_user, update_user
+    </sql>
+
+    <!-- 查询语句 -->
+    <select id="list" parameterType="com.sky.entity.Dish" resultType="com.sky.entity.Dish">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM dish
+        <where>
+            <!-- 如果传入了 categoryId，则按分类查询 -->
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+
+            <!-- 如果传入了 name，则模糊查询名称 -->
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+
+            <!-- 如果传入了 status，则按状态查询（例如 1:起售, 0:停售） -->
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+
+            <!-- 如果有其他条件，比如 create_user 等，可以继续添加 -->
+        </where>
+        <!-- 排序：通常按更新时间倒序，保证最新修改的在前面 -->
+        ORDER BY update_time DESC
+    </select>
 </mapper>

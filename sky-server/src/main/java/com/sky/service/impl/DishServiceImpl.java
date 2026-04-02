@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -147,7 +148,7 @@ public class DishServiceImpl implements DishService {
         //根据id查询菜品数据
         Dish dish = dishMapper.getById(id);
         //根据菜品id查询口味数据
-        List<DishFlavor> dishFlavors = dishMapper.getFlavorById(id);
+        List<DishFlavor> dishFlavors = dishFlavorMapper.getFlavorById(id);
         //将查询到的数据封装到VO
         DishVO dishVO = new DishVO();
         BeanUtils.copyProperties(dish,dishVO);
@@ -180,4 +181,45 @@ public class DishServiceImpl implements DishService {
             dishFlavorMapper.insertBatch(flavors);
         }
     }
+
+    @Override
+    public List<DishVO> listWithFlavor(Dish dish) {
+        List<Dish> dishList = dishMapper.list(dish);
+
+        List<DishVO> dishVOList = new ArrayList<>();
+
+        for (Dish d : dishList) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(d,dishVO);
+
+            //根据菜品id查询对应的口味
+            List<DishFlavor> flavors = dishFlavorMapper. getFlavorById(d.getId());
+
+            dishVO.setFlavors(flavors);
+            dishVOList.add(dishVO);
+        }
+
+        return dishVOList;
+    }
+
+//根据id查询菜品，
+    //因为查询给用户端看，所以要显示启用状态的
+    //但是底层逻辑一样跟上面
+    //不对，这个思路有点问题
+    //因为你查出来的数据是一批一批的，但是你要按照列表的数据返回，那就不可能这样子去搜数据了
+    //得搞个for循环？反正想办法插到列表里
+    //但是怎么插呢？你不可能一个for循环插一个数据就去SQL里搜一遍把，这效率不得慢死
+    /*@Override
+    public List<DishVO> getByIdWithFlavor(Long categoryId) {
+        //根据id查询菜品数据
+        Dish dish = dishMapper.getByIdButStatus(categoryId);
+        //根据菜品id查询口味数据
+        List<DishFlavor> dishFlavors = dishMapper.getFlavorById(categoryId);
+        //将查询到的数据封装到VO
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish,dishVO);
+
+        dishVO.setFlavors(dishFlavors);
+        return dishVO;
+    }*/
 }
