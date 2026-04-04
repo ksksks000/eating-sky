@@ -39,4 +39,10 @@ public interface SetmealMapper {
 
     //管理端，分页查询
     Page<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    //管理端，根据id批量删除套餐
+    void deleteById(List<Long> ids);
+
+    @AutoFill(value = OperationType.UPDATE)
+    void update(Setmeal setmeal);
 }

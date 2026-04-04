@@ -9,7 +9,11 @@ import com.sky.service.SetmealService;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController("adminSetmealController")
 @Slf4j
@@ -19,6 +23,7 @@ public class SetmealController {
     @Autowired
     private SetmealService setmealService;
     @PostMapping
+    @Cacheable(cacheNames = "setmealName",key ="#setmealDTO")
     public Result save (@RequestBody SetmealDTO setmealDTO){
         log.info("新增套餐:{}",setmealDTO);
         setmealService.save(setmealDTO);
@@ -38,4 +43,31 @@ public class SetmealController {
         PageResult pageResult = setmealService.pageQuery(setmealPageQueryDTO);
         return Result.success(pageResult);
     }
+
+    @DeleteMapping
+    @CacheEvict(cacheNames = "setmealCache",allEntries = true)
+    public Result delete(@RequestParam List<Long> ids){
+        log.info("批量删除套餐，{}",ids);
+        setmealService.deleteBatch(ids);
+        return Result.success();
+
+    }
+
+    @PutMapping
+    @CacheEvict(cacheNames = "setmealCache",allEntries = true)
+    public Result update(@RequestBody SetmealDTO setmealDTO){
+        log.info("修改套餐，{}",setmealDTO);
+        setmealService.update(setmealDTO);
+        return Result.success();
+    }
+
+    //起售与停售
+    @PostMapping("/status/{status}")
+    @CacheEvict(cacheNames = "setmealCache",allEntries = true)
+    public Result startOrStop(@PathVariable Integer status,Long id){
+        setmealService.startOrStop(status,id);
+        return Result.success();
+
+    }
+
 }

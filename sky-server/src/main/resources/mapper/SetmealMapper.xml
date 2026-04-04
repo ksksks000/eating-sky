@@ -35,4 +35,28 @@
         values
             (#{id},#{categoryId},#{name},#{image},#{price},#{description},#{createTime},#{updateTime},#{createUser},#{updateUser},#{status})
     </insert>
+
+
+    <delete id="deleteById">
+        delete from setmeal where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="update">
+        update setmeal
+        <set>
+            <if test="price != null">price = #{price},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">categoryId = #{categoryId},</if>
+            <if test="description  != null">description = #{description},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where id = #{id}
+    </update>
+
 </mapper>

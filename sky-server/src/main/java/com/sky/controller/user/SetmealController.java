@@ -9,10 +9,12 @@ import com.sky.vo.DishItemVO;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class SetmealController {
 
     //用户根据菜品id查询到的菜品
     @GetMapping("list")
+    @Cacheable(cacheNames = "setmealCache", key= "#categoryId")
     public Result<List<Setmeal>> getByCategoryId(Long categoryId){
 
         Setmeal setmeal = new Setmeal();
