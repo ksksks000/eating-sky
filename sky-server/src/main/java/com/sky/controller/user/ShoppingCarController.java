@@ -25,10 +25,18 @@ public class ShoppingCarController {
         return Result.success();
     }
 
+    //展示购物车
     @GetMapping("/list")
     public Result<List<ShoppingCart>> list(){
         List<ShoppingCart> list = shoppingCartService.showShoppingCart();
         return Result.success(list);
+    }
+
+    //清空购物车
+    @DeleteMapping("/clean")
+    public Result delete(){
+        shoppingCartService.cleanShoppingCart();
+        return Result.success();
     }
 
 }
