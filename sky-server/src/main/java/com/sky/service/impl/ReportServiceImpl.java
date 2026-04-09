@@ -5,10 +5,14 @@ import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,6 +33,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Autowired
     public UserMapper userMapper;
+    @Autowired
+    private ListableBeanFactory listableBeanFactory;
 
 
     //统计指定时区内的营业额数据
@@ -142,5 +148,61 @@ public class ReportServiceImpl implements ReportService {
                 .totalUserList(StringUtils.join(totalUserList,","))
                 .newUserList(StringUtils.join(newUserList,","))
                 .build();
+    }
+
+    //统计指定时区内的 订单数据
+    @Override
+    public OrderReportVO getOrderStatistics(LocalDate begin, LocalDate end) {
+        //当前集合用于存放从begin到end范围内的每天的日期
+        List<LocalDate> dateList = new ArrayList<>();
+
+        dateList.add(begin);
+
+        while (!begin.equals(end)){
+            //每次begin+1，且压进datelist ，直到end那一天
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+
+        List<Integer> orderCountList = new ArrayList<>();
+        List<Integer> vaildOrderCountList = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endime = LocalDateTime.of(date, LocalTime.MAX);
+            Integer orderCount = getOrderCount(beginTime,endime,null);
+
+            Integer vaildOrderCount = getOrderCount(beginTime, endime,Orders.COMPLETED);
+
+            orderCountList.add(orderCount);
+            vaildOrderCountList.add(vaildOrderCount);
+
+        }
+
+        Integer totalOrderCount = orderCountList.stream().reduce(Integer::sum).get();
+        Integer vaildOrderCount = vaildOrderCountList.stream().reduce(Integer::sum).get();
+
+        Double orderCompletionRate = 0.0;
+        if (totalOrderCount != 0){
+             orderCompletionRate = vaildOrderCount.doubleValue() / totalOrderCount;
+        }
+
+
+        return OrderReportVO.builder()
+                .dateList(StringUtils.join(dateList,","))
+                .orderCountList(StringUtils.join(orderCountList,","))
+                .validOrderCountList(StringUtils.join(vaildOrderCountList,","))
+                .totalOrderCount(totalOrderCount)
+                .validOrderCount(vaildOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    private Integer getOrderCount(LocalDateTime begin,LocalDateTime end,Integer status){
+        Map map = new HashMap<>();
+        map.put("begin",begin);
+        map.put("end",end);
+        map.put("status",status);
+        return orderMapper.getOrderByMap(map);
     }
 }
