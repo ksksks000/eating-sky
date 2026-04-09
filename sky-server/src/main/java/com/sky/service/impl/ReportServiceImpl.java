@@ -3,9 +3,12 @@ package com.sky.service.impl;
 import com.github.pagehelper.util.StringUtil;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
+import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.TurnoverReportVO;
+import com.sky.vo.UserReportVO;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,11 +22,13 @@ import java.util.Map;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-    private final OrderMapper orderMapper;
 
-    public ReportServiceImpl(OrderMapper orderMapper) {
-        this.orderMapper = orderMapper;
-    }
+
+    @Autowired
+    public  OrderMapper orderMapper;
+
+    @Autowired
+    public UserMapper userMapper;
 
 
     //统计指定时区内的营业额数据
@@ -96,4 +101,46 @@ public class ReportServiceImpl implements ReportService {
     * 你上面已经有对应每天的日期了，
     * 所以你根据每天的订单直接加起来就好了
     * 一样的，还是装到list里面到后面分隔一下*/
+
+
+    //统计指定时区内的 用户数据
+    @Override
+    public UserReportVO getUserStatistics(LocalDate begin, LocalDate end) {
+        //当前集合用于存放从begin到end范围内的每天的日期
+        List<LocalDate> dateList = new ArrayList<>();
+
+        dateList.add(begin);
+
+        while (!begin.equals(end)){
+            //每次begin+1，且压进datelist ，直到end那一天
+            begin = begin.plusDays(1);
+            dateList.add(begin);
+        }
+
+        List<Integer> newUserList = new ArrayList<>();
+
+        List<Integer> totalUserList = new ArrayList<>();
+
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endime = LocalDateTime.of(date, LocalTime.MAX);
+
+            Map map = new HashMap<>();
+            map.put("end",endime);
+            //总用户数量
+            Integer totalUser = userMapper.countByMap(map);
+            //每日新增用户数量
+            map.put("begin",beginTime);
+            Integer newUser = userMapper.countByMap(map);
+            newUserList.add(newUser);
+            totalUserList.add(totalUser);
+        }
+
+
+        return UserReportVO.builder()
+                .dateList(StringUtils.join(dateList,","))
+                .totalUserList(StringUtils.join(totalUserList,","))
+                .newUserList(StringUtils.join(newUserList,","))
+                .build();
+    }
 }
