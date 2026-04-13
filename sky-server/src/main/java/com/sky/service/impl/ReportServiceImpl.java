@@ -6,6 +6,7 @@ import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import io.swagger.models.auth.In;
@@ -204,5 +205,39 @@ public class ReportServiceImpl implements ReportService {
         map.put("end",end);
         map.put("status",status);
         return orderMapper.getOrderByMap(map);
+    }
+
+
+    /*
+    * 统计指定时区内的top10销量*/
+    @Override
+    public SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end) {
+        // 1. 调用Mapper查询数据库，返回 List<Map<String, Object>>
+        Map<String, Object> map = new HashMap<>();
+        map.put("begin", begin);
+        map.put("end", end);
+
+        List<Map<String, Object>> resultList = orderMapper.getSalesTop10(map);
+
+        // 2. 数据清洗与转换
+        List<String> nameList = new ArrayList<>();
+        List<Integer> numberList = new ArrayList<>();
+
+        if (resultList != null && !resultList.isEmpty()) {
+            for (Map<String, Object> item : resultList) {
+                // 假设SQL返回的key是 "name" 和 "number"
+                nameList.add((String) item.get("name"));
+                // 如果数据库返回的是Long类型（count统计），需要转为Integer
+                Number number = (Number) item.get("number");
+                numberList.add(number.intValue());
+            }
+        }
+
+
+        // 3. 封装VO返回
+        return SalesTop10ReportVO.builder()
+                .nameList(nameList.toString())
+                .numberList(numberList.toString())
+                .build();
     }
 }

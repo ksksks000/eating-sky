@@ -58,4 +58,27 @@
             </if>
         </where>
     </select>
+    <select id="getSalesTop10" resultType="java.util.Map">
+        SELECT
+            od.name AS name,
+            SUM(od.number) AS number
+        FROM
+            order_detail od
+        INNER JOIN
+            orders o ON od.order_id = o.id
+        <where>
+            o.status = 5 <!-- 假设 5 代表“已完成”，只有完成的订单才计入销量 -->
+            <if test="begin != null">
+                AND o.order_time &gt;= #{begin}
+            </if>
+            <if test="end != null">
+                AND o.order_time &lt;= #{end}
+            </if>
+        </where>
+        GROUP BY
+            od.name
+        ORDER BY
+            number DESC
+        LIMIT 10
+    </select>
 </mapper>
