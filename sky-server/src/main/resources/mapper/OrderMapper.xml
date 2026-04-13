@@ -81,4 +81,14 @@
             number DESC
         LIMIT 10
     </select>
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from setmeal
+        <where>
+            <if test="status != null">
+                and status = #{status} </if>
+            <if test="begin != null">
+                and create_time &gt; #{begin}
+            </if>
+        </where>
+    </select>
 </mapper>

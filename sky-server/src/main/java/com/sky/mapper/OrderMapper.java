@@ -43,4 +43,6 @@ public interface OrderMapper {
     Integer getOrderByMap(Map map);
 
     List<Map<String, Object>> getSalesTop10(Map<String, Object> map);
+
+    Integer countByMap(Map map);
 }

@@ -29,7 +29,6 @@
         order by d.create_time desc
     </select>
 
-
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         insert into setmeal (id, category_id, name, image, price,description, create_time, update_time, create_user, update_user, status)
         values
@@ -52,4 +51,12 @@
         where id = #{id}
     </update>
 
+
+    <select id="countByMap" resultType="java.lang.Integer">
+        select count(id) from setmeal
+        <where>
+            <if test="status != null"> and status = #{status} </if>
+            <if test="categoryId != null"> and category_id = #{categoryId} </if>
+        </where>
+    </select>
 </mapper>
