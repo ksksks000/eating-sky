@@ -8,18 +8,18 @@ sky:
     password: 123456
   alioss:
     endpoint: oss-cn-guangzhou.aliyuncs.com
-    access-key-id: LTAI5tGHJkV7DmSdAK2Ppeer
-    access-key-secret: CsIpEBLV307eKnAVkapYK9yczy68Wy
-    bucket-name: chi-fan-bao
+    access-key-id:
+    access-key-secret: 
+    bucket-name: 
   redis:
     host: localhost
     port: 6379
     password: 123456
     database: 0
   wechat:
-    appid: wxa950cce12f1bace3
-    secret: 77b35ce367647cd2613115eb6a7d5ed3
-    mchid: 1110896692
+    appid: 
+    secret: 
+    mchid: 
     mch-serial-no:
     private-key-file-path:
     api-v3-key:
